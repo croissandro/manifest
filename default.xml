@@ -13,7 +13,7 @@
   />
 
   <default
-    revision="android-latest-release"
+    revision="android17-release"
     remote="aosp"
     sync-j="4"
   />
