@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generic x86_64 foundation for the CroissAndro/WSA-compatible prototype. -->
 <manifest>
   <remote
     name="aosp"
     fetch="https://android.googlesource.com/a/"
-    review="https://android-review.googlesource.com/a/"
+    review="https://android-review.googlesource.com/"
   />
 
   <remote
     name="croissandro"
-    fetch="https://github.com/croissandro"
+    fetch="https://github.com/croissandro/"
   />
 
   <default
@@ -17,10 +18,99 @@
     sync-j="4"
   />
 
-  <project
-    name="croissandro"
-    path="device/croissandro"
-    remote="croissandro"
-    revision="main"
-  />
+  <!-- CroissAndro product/device definition. -->
+  <project name="croissandro" path="device/croissandro" remote="croissandro" revision="main" />
+
+  <!-- Build system and language/runtime foundation. -->
+  <project path="build/make" name="platform/build" />
+  <project path="build/blueprint" name="platform/build/blueprint" />
+  <project path="build/release" name="platform/build/release" />
+  <project path="build/soong" name="platform/build/soong" />
+  <project path="art" name="platform/art" />
+  <project path="bionic" name="platform/bionic" />
+  <project path="libcore" name="platform/libcore" />
+  <project path="libnativehelper" name="platform/libnativehelper" />
+  <project path="external/boringssl" name="platform/external/boringssl" />
+  <project path="external/zlib" name="platform/external/zlib" />
+  <project path="external/protobuf" name="platform/external/protobuf" />
+  <project path="external/libpng" name="platform/external/libpng" />
+  <project path="external/skia" name="platform/external/skia" />
+
+  <!-- Generic x86_64/Goldfish device foundation; Windows HALs come later. -->
+  <project path="device/generic/common" name="device/generic/common" />
+  <project path="device/generic/goldfish" name="device/generic/goldfish" />
+  <project path="device/generic/x86_64" name="device/generic/x86_64" />
+  <project path="hardware/google/gfxstream" name="platform/hardware/google/gfxstream" />
+  <project path="hardware/interfaces" name="platform/hardware/interfaces" />
+  <project path="hardware/libhardware" name="platform/hardware/libhardware" />
+
+  <!-- Android framework, native services, IPC, init, and security. -->
+  <project path="frameworks/base" name="platform/frameworks/base" />
+  <project path="frameworks/native" name="platform/frameworks/native" />
+  <project path="frameworks/av" name="platform/frameworks/av" />
+  <project path="system/core" name="platform/system/core" />
+  <project path="system/libbase" name="platform/system/libbase" />
+  <project path="system/libhidl" name="platform/system/libhidl" />
+  <project path="system/libhwbinder" name="platform/system/libhwbinder" />
+  <project path="system/libutils" name="platform/system/libutils" />
+  <project path="system/libvintf" name="platform/system/libvintf" />
+  <project path="system/libziparchive" name="platform/system/libziparchive" />
+  <project path="system/linkerconfig" name="platform/system/linkerconfig" />
+  <project path="system/logging" name="platform/system/logging" />
+  <project path="system/media" name="platform/system/media" />
+  <project path="system/sepolicy" name="platform/system/sepolicy" />
+  <project path="system/tools/aidl" name="platform/system/tools/aidl" />
+  <project path="system/tools/hidl" name="platform/system/tools/hidl" />
+  <project path="system/tools/sysprop" name="platform/system/tools/sysprop" />
+  <project path="system/apex" name="platform/system/apex" />
+  <project path="system/fs/fs_mgr" name="platform/system/fs/fs_mgr" />
+  <project path="system/keymint" name="platform/system/keymint" />
+  <project path="system/security" name="platform/system/security" />
+  <project path="system/vold" name="platform/system/vold" />
+  <project path="system/zygote" name="platform/system/zygote" />
+  <project path="system/timezone" name="platform/system/timezone" />
+
+  <!-- ADB and minimum guest networking. -->
+  <project path="packages/modules/adb" name="platform/packages/modules/adb" />
+  <project path="packages/modules/Bluetooth" name="platform/packages/modules/Bluetooth" />
+  <project path="packages/modules/CaptivePortalLogin" name="platform/packages/modules/CaptivePortalLogin" />
+  <project path="packages/modules/Connectivity" name="platform/packages/modules/Connectivity" />
+  <project path="packages/modules/common" name="platform/packages/modules/common" />
+  <project path="packages/modules/DnsResolver" name="platform/packages/modules/DnsResolver" />
+  <project path="packages/modules/Media" name="platform/packages/modules/Media" />
+  <project path="packages/modules/ModuleMetadata" name="platform/packages/modules/ModuleMetadata" />
+  <project path="packages/modules/NetworkStack" name="platform/packages/modules/NetworkStack" />
+  <project path="packages/modules/Permission" name="platform/packages/modules/Permission" />
+  <project path="packages/modules/RuntimeI18n" name="platform/packages/modules/RuntimeI18n" />
+  <project path="packages/modules/Wifi" name="platform/packages/modules/Wifi" />
+  <project path="system/netd" name="platform/system/netd" />
+  <project path="system/connectivity/wificond" name="platform/system/connectivity/wificond" />
+  <project path="external/wpa_supplicant_8" name="platform/external/wpa_supplicant_8" />
+
+  <!-- Runtime/build dependencies used by the platform and x86 graphics stack. -->
+  <project path="external/expat" name="platform/external/expat" />
+  <project path="external/icu" name="platform/external/icu" />
+  <project path="external/libcxx" name="platform/external/libcxx" />
+  <project path="external/libcxxabi" name="platform/external/libcxxabi" />
+  <project path="external/llvm" name="platform/external/llvm" />
+  <project path="external/SPIRV-Headers" name="platform/external/SPIRV-Headers" />
+  <project path="external/SPIRV-Tools" name="platform/external/SPIRV-Tools" />
+  <project path="external/swiftshader" name="platform/external/swiftshader" />
+  <project path="external/vulkan-headers" name="platform/external/vulkan-headers" />
+  <project path="external/vulkan-validation-layers" name="platform/external/vulkan-validation-layers" />
+
+  <!-- Host toolchain required for a reproducible AOSP build. -->
+  <project path="prebuilts/build-tools" name="platform/prebuilts/build-tools" clone-depth="1" />
+  <project path="prebuilts/clang/host/linux-x86" name="platform/prebuilts/clang/host/linux-x86" clone-depth="1" />
+  <project path="prebuilts/go/linux-x86" name="platform/prebuilts/go/linux-x86" clone-depth="1" />
+  <project path="prebuilts/jdk/jdk21" name="platform/prebuilts/jdk/jdk21" clone-depth="1" />
+  <project path="prebuilts/misc" name="platform/prebuilts/misc" clone-depth="1" />
+  <project path="prebuilts/ndk" name="platform/prebuilts/ndk" clone-depth="1" />
+  <project path="prebuilts/rust" name="platform/prebuilts/rust" clone-depth="1" />
+  <project path="prebuilts/rust-toolchain/linux-x86" name="platform/prebuilts/rust-toolchain/linux-x86" clone-depth="1" />
+  <project path="prebuilts/sdk" name="platform/prebuilts/sdk" clone-depth="1" />
+
+  <!-- Optional graphical shell; remove these for a headless base image. -->
+  <project path="packages/apps/Launcher3" name="platform/packages/apps/Launcher3" />
+  <project path="packages/apps/Settings" name="platform/packages/apps/Settings" />
 </manifest>
