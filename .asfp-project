@@ -1,0 +1,55 @@
+# Required: AOSP public repo.
+repo: /home/vpogor/repos/public/aosp
+
+# Current CroissAndro target.
+lunch: croissandro_x86_64_linux-trunk_staging-userdebug
+
+# Limit ASfP's background file indexers to source trees relevant to this project.
+directories:
+  include:
+    - frameworks/base                       # Deep core framework code
+    - packages/apps/Settings                # Core settings app architecture
+    - hardware/interfaces                   # Hardware Abstraction Layer (HAL) targets
+    - build/make                            # Build system makefiles
+    - build/soong                           # Soong build system
+    - system/core                           # Core system components
+    - device/generic                        # Generic device definitions
+    - device/croissandro                    # CroissAndro product definitions
+    - vendor/croissandro                    # CroissAndro vendor definitions
+    - kernel/croissandro                    # CroissAndro kernel configuration
+  exclude:
+    - out                                   # Exclude huge build artifacts
+    - .repo                                 # Exclude git history
+    - prebuilts                             # Exclude binary toolchains
+
+# Pin the explicit compilation target groups used by ASfP.
+modules:
+  include:
+    - Settings
+    - framework-minus-apex
+    - services
+
+other_languages:
+  - cpp
+  - rust
+
+build_config:
+  flags:
+    # Ninja normally filters JAVA_TOOL_OPTIONS because environment changes are
+    # not represented in its action inputs. Allow this one variable through so
+    # child JVMs launched by Soong can use the dedicated executable temp folder.
+    - BUILD_BROKEN_NINJA_USES_ENV_VARS=JAVA_TOOL_OPTIONS
+
+    - -j48
+  env:
+    # The Room/Xerial SQLite JDBC processor extracts libsqlitejdbc.so into the
+    # JVM temporary directory. /tmp is mounted noexec, so redirect Java's
+    # temporary directory to a location on /home where native libraries can be
+    # mapped and executed. This value must reach Ninja-launched Java actions.
+    JAVA_TOOL_OPTIONS: >-
+      -Djava.io.tmpdir=/home/vpogor/repos/pogor-dev/croissandro/out/aosp-tmp
+      -Dorg.sqlite.tmpdir=/home/vpogor/repos/pogor-dev/croissandro/out/aosp-tmp
+
+    # TMPDIR is already in Soong/Ninja's default environment allow-list and
+    # keeps other tools aligned with the same temporary directory.
+    TMPDIR: "/home/vpogor/repos/pogor-dev/croissandro/out/aosp-tmp"

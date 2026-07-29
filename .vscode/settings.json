@@ -1,4 +1,7 @@
 {
+   "files.associations": {
+    ".asfp-project": "yaml"
+  },
   "[xml]": {
     "editor.defaultFormatter": "redhat.vscode-xml",
     "editor.formatOnSave": true,
