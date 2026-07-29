@@ -1,0 +1,14 @@
+* text=auto eol=lf
+
+*.xml text
+*.json text
+*.md text
+LICENSE text
+
+*.7z binary
+*.gz binary
+*.jar binary
+*.jpg binary
+*.png binary
+*.tar binary
+*.zip binary
