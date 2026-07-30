@@ -1,8 +1,8 @@
 # Required: AOSP public repo.
-repo: /home/vpogor/repos/croissandro/manifest
+repo: /home/vpogor/repos/croissandro/aosp
 
 # Current CroissAndro target.
-lunch: croissandro_x86_64_linux-trunk_staging-userdebug
+lunch: aosp_cf_x86_64_only_phone-aosp_current-userdebug
 
 # Limit ASfP's background file indexers to source trees relevant to this project.
 directories:
@@ -14,10 +14,8 @@ directories:
 
 # Pin the explicit compilation target groups used by ASfP.
 modules:
-  include:
-    - Settings
-    - framework-minus-apex
-    - services
+  include: []
+  exclude: []
 
 other_languages:
   - cpp

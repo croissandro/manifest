@@ -21,3 +21,7 @@ source build/envsetup.sh
 ```sh
 lunch croissandro_x86_64_linux-trunk_staging-userdebug
 ```
+
+```sh
+m BUILD_BROKEN_NINJA_USES_ENV_VARS=JAVA_TOOL_OPTIONS -j48
+```
