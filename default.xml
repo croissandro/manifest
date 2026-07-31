@@ -4,6 +4,12 @@
   <include name="aosp/default.xml" />
 
   <remote
+    name="aosp"
+    fetch="https://android.googlesource.com/a/"
+    review="https://android-review.googlesource.com/"
+  />
+
+  <remote
     name="croissandro"
     fetch="https://github.com/croissandro/"
   />
