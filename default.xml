@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- CroissAndro manifest layered on top of the AOSP manifest submodule. -->
 <manifest>
-  <include name="aosp/default.xml" />
-
-  <remote
-    name="aosp"
-    fetch="https://android.googlesource.com/a/"
-    review="https://android-review.googlesource.com/"
-  />
 
   <remote
     name="croissandro"

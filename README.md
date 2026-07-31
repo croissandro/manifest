@@ -39,10 +39,7 @@ Use a pinned AOSP branch or tag instead of `master` for reproducible builds.
 cd ~
 mkdir -p aosp
 cd aosp
-repo init --partial-clone \
-  -b feat/setup \
-  -u https://github.com/croissandro/manifest \
-  -m default.xml
+repo init --partial-clone -b feat/setup -u https://github.com/croissandro/manifest
 repo sync -c -j8
 ```
 

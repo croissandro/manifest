@@ -1,5 +1,5 @@
 # Required: AOSP public repo.
-repo: /home/vpogor/repos/croissandro/aosp
+repo: ~/repos/croissandro/aosp
 
 # Current CroissAndro target.
 lunch: aosp_cf_x86_64_only_phone-aosp_current-userdebug
