@@ -23,21 +23,5 @@ other_languages:
 
 build_config:
   flags:
-    # Ninja normally filters JAVA_TOOL_OPTIONS because environment changes are
-    # not represented in its action inputs. Allow this one variable through so
-    # child JVMs launched by Soong can use the dedicated executable temp folder.
-    - BUILD_BROKEN_NINJA_USES_ENV_VARS=JAVA_TOOL_OPTIONS
-
     - -j48
-  env:
-    # The Room/Xerial SQLite JDBC processor extracts libsqlitejdbc.so into the
-    # JVM temporary directory. /tmp is mounted noexec, so redirect Java's
-    # temporary directory to a location on /home where native libraries can be
-    # mapped and executed. This value must reach Ninja-launched Java actions.
-    JAVA_TOOL_OPTIONS: >-
-      -Djava.io.tmpdir=/home/vpogor/repos/pogor-dev/croissandro/out/aosp-tmp
-      -Dorg.sqlite.tmpdir=/home/vpogor/repos/pogor-dev/croissandro/out/aosp-tmp
-
-    # TMPDIR is already in Soong/Ninja's default environment allow-list and
-    # keeps other tools aligned with the same temporary directory.
-    TMPDIR: "/home/vpogor/repos/pogor-dev/croissandro/out/aosp-tmp"
+  env: {}
