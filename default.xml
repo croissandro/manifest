@@ -1,21 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- CroissAndro manifest layered on top of the AOSP manifest submodule. -->
 <manifest>
-  <remote
-    name="aosp"
-    fetch="https://android.googlesource.com/a/"
-    review="https://android-review.googlesource.com/"
-    revision="android-latest-release"
-  />
-
-  <project path="aosp-manifest" name="platform/manifest" />
+  <include name="aosp/default.xml" />
 
   <remote
     name="croissandro"
     fetch="https://github.com/croissandro/"
   />
-
-  <include name="aosp/default.xml" />
 
   <project
     name="croissandro"
@@ -24,4 +15,5 @@
     revision="main"
     groups="device,pdk"
   />
+
 </manifest>
