@@ -1,0 +1,3 @@
+[submodule "aosp"]
+	path = aosp
+	url = https://android.googlesource.com/platform/manifest
