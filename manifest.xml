@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CroissAndro manifest layered on top of the AOSP manifest submodule. -->
+<manifest>
+
+  <remote
+    name="croissandro"
+    fetch="https://github.com/croissandro/"
+  />
+
+  <project
+    name="croissandro"
+    path="device/croissandro"
+    remote="croissandro"
+    revision="main"
+    groups="device,pdk"
+  />
+
+</manifest>

@@ -1,0 +1,8 @@
+.repo/
+build/
+
+.idea/
+.gen-info/
+.gen-source \[read-only].iml
+.sync/
+source.iml
