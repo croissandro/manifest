@@ -1,12 +1,13 @@
 # Required: AOSP public repo.
-repo: ~/repos/croissandro/aosp
+repo: /home/vpogor/repos/croissandro/aosp
 
 # Current CroissAndro target.
-lunch: aosp_cf_x86_64_only_phone-aosp_current-userdebug
+lunch: croissandro_hyperv_x86_64-trunk_staging-userdebug
 
 # Limit ASfP's background file indexers to source trees relevant to this project.
 directories:
-  include: []
+  include:
+    - device/croissandro
   exclude:
     - out                                   # Exclude huge build artifacts
     - .repo                                 # Exclude git history

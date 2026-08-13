@@ -15,4 +15,12 @@
     groups="device,pdk"
   />
 
+  <project
+    name="kernel-prebuilts"
+    path="prebuilts/kernel/croissandro/6.18"
+    remote="croissandro"
+    revision="main"
+    groups="device,pdk"
+  />
+
 </manifest>

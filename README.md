@@ -97,9 +97,9 @@ Add this local manifest to the AOSP checkout. Clone or download this repository
 first if it is not already present at `~/repos/croissandro/manifest`:
 
 ```sh
-mkdir -p .repo/local_manifests
+mkdir -p $HOME/repos/croissandro/aosp/.repo/local_manifests
 cp "$HOME/repos/croissandro/manifest/manifest.xml" \
-  .repo/local_manifests/croissandro.xml
+  $HOME/repos/croissandro/aosp/.repo/local_manifests/croissandro.xml
 ```
 
 Sync the source tree:
@@ -119,7 +119,7 @@ Run these commands from the AOSP checkout root:
 ```sh
 cd "$HOME/repos/croissandro/aosp"
 source build/envsetup.sh
-lunch croissandro_x86_64_linux-trunk_staging-userdebug
+lunch croissandro_hyperv_x86_64-trunk_staging-userdebug
 m
 ```
 
