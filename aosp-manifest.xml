@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- CroissAndro manifest layered on top of the AOSP manifest submodule. -->
+<!-- CroissAndro projects layered on top of the upstream AOSP manifest. -->
 <manifest>
 
   <remote

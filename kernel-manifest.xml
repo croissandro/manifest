@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CroissAndro projects layered on top of the upstream ACK manifest. -->
+<manifest>
+
+  <remote
+    name="croissandro"
+    fetch="https://github.com/croissandro/"
+  />
+
+  <!--
+    Keep build policy inside the kernel repo workspace so its BUILD.bazel can
+    load Kleaf rules and //common sources without modifying upstream projects.
+  -->
+  <project
+    name="kernel-build"
+    path="croissandro"
+    remote="croissandro"
+    revision="main"
+    groups="ddk"
+  />
+
+</manifest>

@@ -1,177 +1,175 @@
-# CroissAndro AOSP manifest
+# CroissAndro manifests
 
-This repository is a local manifest for building CroissAndro on top of the
-Android Open Source Project (AOSP). It adds the CroissAndro device project at
-`device/croissandro` and provides the `croissandro_x86_64_linux-trunk_staging`
-build target.
+This repository contains the CroissAndro local-manifest overlays for two
+independent Android source workspaces:
 
-The setup below follows Google's [AOSP development setup guide](https://source.android.com/docs/setup/start).
-For background, Git manages individual source repositories, `repo` coordinates
-the many Git repositories in an AOSP checkout, and the manifest XML files map
-those repositories into the source tree.
+| File | Upstream workspace | Projects added |
+|---|---|---|
+| `aosp-manifest.xml` | AOSP platform | Android device/product configuration and published kernel prebuilts |
+| `kernel-manifest.xml` | Android Common Kernel (ACK) | CroissAndro Kleaf configuration and build policy |
+
+These files are overlays, not replacements for Google's manifests. Copy each
+one into the corresponding checkout's `.repo/local_manifests` directory after
+running `repo init` against the official upstream manifest.
+
+The intended layout is:
+
+```text
+croissandro/
+├── aosp/                       AOSP platform repo workspace
+│   ├── device/croissandro/     from the AOSP overlay
+│   └── prebuilts/kernel/
+│       └── croissandro/6.18/   reviewed kernel artifacts
+├── kernel/                     ACK repo workspace
+│   ├── build/kernel/
+│   ├── common/
+│   ├── croissandro/            kernel-build repository
+│   └── tools/bazel
+└── manifest/                   this repository
+```
+
+Keeping AOSP and ACK as separate `repo` workspaces follows Google's build
+model: the kernel tree owns sources and build tools, while the Android tree
+consumes published kernel binaries.
 
 ## Prerequisites
 
-### Hardware requirements
+- A supported 64-bit Linux host
+- Git and Python 3
+- Android `repo` 2.4 or newer
+- Sufficient storage for separate AOSP and kernel checkouts and build outputs
 
-- 64-bit x86 Linux workstation
-- At least 64 GB of RAM
-- At least 400 GB of free disk space:
-  - Approximately 250 GB for the source checkout
-  - Approximately 150 GB for the build output
-- A first build can take several hours
+For complete host requirements, see the official
+[AOSP setup guide](https://source.android.com/docs/setup/start) and
+[kernel build guide](https://source.android.com/docs/setup/build/building-kernels).
 
-### Software requirements
+## AOSP platform workspace
 
-- 64-bit Linux distribution with glibc 2.17 or later
-- Git
-- Python 3
-- OpenJDK
-- Make
-- Android `repo` version 2.4 or newer
-
-The latest AOSP release branch provides prebuilt OpenJDK, Make, and Python 3,
-so they do not need to be installed separately.
-
-On Ubuntu 18.04 or later, install the AOSP host packages:
-
-```sh
-sudo apt-get update
-sudo apt-get install git-core gnupg flex bison build-essential zip curl \
-  zlib1g-dev libc6-dev-i386 x11proto-core-dev libx11-dev lib32z1-dev \
-  libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig
-```
-
-Install the `repo` launcher from the package manager if it is available:
-
-```sh
-sudo apt-get install repo
-repo version
-```
-
-The launcher should report version 2.4 or newer. If your distribution does not
-provide a recent launcher, install it manually and verify its signature:
-
-```sh
-repo_tmp="$(mktemp /tmp/repo.XXXXXXXXX)"
-curl -o "$repo_tmp" https://storage.googleapis.com/git-repo-downloads/repo
-gpg --recv-keys 8BB9AD793E8E6153AF0F9A4416530D5E920F5C65
-curl -s https://storage.googleapis.com/git-repo-downloads/repo.asc \
-  | gpg --verify - "$repo_tmp"
-mkdir -p "$HOME/bin"
-install -m 755 "$repo_tmp" "$HOME/bin/repo"
-export PATH="$HOME/bin:$PATH"
-repo version
-```
-
-For authenticated syncing or quota issues, see the AOSP guide to
-[fixing sync quota barriers](https://source.android.com/docs/setup/download/troubleshoot-sync#fix-quota-barriers).
-
-## Get started
-
-Choose a checkout directory. The commands below use `~/repos/croissandro/aosp`;
-you can substitute any absolute path.
+Initialize the platform checkout using Google's current release manifest:
 
 ```sh
 mkdir -p "$HOME/repos/croissandro/aosp"
 cd "$HOME/repos/croissandro/aosp"
-```
 
-When prompted by `repo`, enter the name and email address you use for Git. Set
-them before initializing the checkout:
-
-```sh
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
-```
-
-Initialize the AOSP source checkout:
-
-```sh
 repo init --partial-clone \
   -b android-latest-release \
   -u https://android.googlesource.com/platform/manifest
 ```
 
-Add this local manifest to the AOSP checkout. Clone or download this repository
-first if it is not already present at `~/repos/croissandro/manifest`:
+Install the CroissAndro AOSP overlay and sync:
 
 ```sh
-mkdir -p $HOME/repos/croissandro/aosp/.repo/local_manifests
-cp "$HOME/repos/croissandro/manifest/manifest.xml" \
-  $HOME/repos/croissandro/aosp/.repo/local_manifests/croissandro.xml
-```
+mkdir -p .repo/local_manifests
+cp "$HOME/repos/croissandro/manifest/aosp-manifest.xml" \
+  .repo/local_manifests/croissandro.xml
 
-Sync the source tree:
-
-```sh
 repo sync -c -j8
 ```
 
-If the sync is interrupted, run the same command again. For a slower or
-resource-constrained host, use fewer jobs. On a faster host, increase the
-number carefully because parallel syncs use more memory and network bandwidth.
-
-## Configure and build
-
-Run these commands from the AOSP checkout root:
+Configure and build the API-level 37 development product:
 
 ```sh
-cd "$HOME/repos/croissandro/aosp"
 source build/envsetup.sh
 lunch croissandro_hyperv_x86_64-trunk_staging-userdebug
 m
 ```
 
-The `userdebug` variant is intended for development and debugging. Build
-outputs are written under `out/`, with the precise locations depending on the
-AOSP branch and build system configuration.
-
-The first build is expected to take hours; subsequent incremental builds are
-usually much faster.
-
-## Verify the manifest
-
-After syncing, confirm that the CroissAndro project is present:
+Verify the projects supplied by the overlay:
 
 ```sh
-repo list | rg 'device/croissandro'
+repo list | grep -E 'device/croissandro|prebuilts/kernel/croissandro'
 test -f device/croissandro/AndroidProducts.mk
 ```
 
-To see the available lunch targets, initialize the build environment and run:
+## ACK kernel workspace
+
+The kernel uses its own upstream manifest and checkout. Select an ACK branch
+that is compatible with the Android product. The current bring-up checkout
+uses `common-android-mainline`; pin a release branch and reviewed revisions
+before publishing production prebuilts.
+
+The AOSP overlay currently consumes the `kernel-prebuilts` repository under a
+`6.18` path. Treat `common-android-mainline` as exploratory until the kernel
+branch and that publication namespace are deliberately aligned; do not publish
+a mainline 7.x artifact as if it were a 6.18 build.
 
 ```sh
-source build/envsetup.sh
-lunch
+mkdir -p "$HOME/repos/croissandro/kernel"
+cd "$HOME/repos/croissandro/kernel"
+
+repo init \
+  -b common-android-mainline \
+  -u https://android.googlesource.com/kernel/manifest
 ```
 
-## Troubleshooting
-
-- `repo: command not found`: add the directory containing `repo` to `PATH` and
-  start a new shell, or run `export PATH="$HOME/bin:$PATH"` again.
-- Package installation fails: confirm that the host is a supported 64-bit
-  Linux distribution and that the Ubuntu package list matches your release.
-- Sync fails with quota or authentication errors: configure Git credentials and
-  follow the AOSP [quota-barrier guidance](https://source.android.com/docs/setup/download/troubleshoot-sync#fix-quota-barriers).
-- The CroissAndro target is missing: make sure
-  `.repo/local_manifests/croissandro.xml` exists, then rerun `repo sync`.
-- A partial sync leaves the checkout inconsistent: rerun
-  `repo sync -c -j8`; if the error names a specific project, inspect that
-  project before retrying rather than deleting the whole checkout.
-- The build runs out of memory: reduce the parallelism, for example
-  `m -j8`, and ensure sufficient swap is available.
-
-## Updating
-
-Pull changes to this manifest repository, copy the updated `manifest.xml` into
-`.repo/local_manifests/croissandro.xml`, and sync again:
+Install the kernel overlay and sync:
 
 ```sh
-cp "$HOME/repos/croissandro/manifest/manifest.xml" \
+mkdir -p .repo/local_manifests
+cp "$HOME/repos/croissandro/manifest/kernel-manifest.xml" \
   .repo/local_manifests/croissandro.xml
+
 repo sync -c -j8
 ```
 
-The local manifest is intentionally kept separate from AOSP's upstream
-manifest, so it can be updated without modifying files under `.repo/manifests`.
+The overlay places the separate `kernel-build` Git repository at
+`kernel/croissandro`, where its Bazel package can use the workspace's Kleaf
+rules and ACK sources without patching `common` or `build/kernel`.
+
+Build and validate from that project:
+
+```sh
+cd "$HOME/repos/croissandro/kernel/croissandro"
+./check-config.sh
+./build.sh
+```
+
+To choose the distribution directory explicitly:
+
+```sh
+DIST_DIR="$HOME/repos/croissandro/kernel-out" ./build.sh
+```
+
+After boot and compatibility testing, publish the reviewed artifacts to the
+`kernel-prebuilts` repository consumed by the AOSP overlay. Record both the
+ACK source revision and the `kernel-build` revision with every publication.
+
+## Updating existing workspaces
+
+After pulling this repository, refresh the appropriate overlay and resync.
+
+AOSP:
+
+```sh
+cd "$HOME/repos/croissandro/aosp"
+cp ../manifest/aosp-manifest.xml .repo/local_manifests/croissandro.xml
+repo sync -c -j8
+```
+
+Kernel:
+
+```sh
+cd "$HOME/repos/croissandro/kernel"
+cp ../manifest/kernel-manifest.xml .repo/local_manifests/croissandro.xml
+repo sync -c -j8
+```
+
+Do not edit `.repo/manifests` or the generated `.repo/manifest.xml`; `repo`
+owns those files. CroissAndro changes remain in this repository and the
+projects declared by these local overlays.
+
+## Troubleshooting
+
+- If a CroissAndro project is missing, confirm that the correct overlay exists
+  at `.repo/local_manifests/croissandro.xml`, then rerun `repo sync`.
+- If kernel build analysis reports a missing toolchain project, sync the named
+  path from the kernel workspace. For example:
+
+  ```sh
+  repo sync -c prebuilts/clang/host/linux-x86
+  ```
+
+- If a sync is interrupted, rerun the same command. Reduce `-j8` on a
+  memory- or network-constrained host.
+- Do not delete an entire checkout to repair one failed project; inspect and
+  resync the specific path first.
