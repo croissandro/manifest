@@ -1,51 +1,60 @@
 # CroissAndro manifests
 
-This repository contains the CroissAndro local-manifest overlays for two
-independent Android source workspaces:
+This repository is the entry point for CroissAndro source setup. It contains
+local-manifest overlays for two independent Google `repo` workspaces:
 
-| File | Upstream workspace | Projects added |
+| File | Upstream workspace | CroissAndro projects added |
 |---|---|---|
-| `aosp-manifest.xml` | AOSP platform | Android device/product configuration and published kernel prebuilts |
-| `kernel-manifest.xml` | Android Common Kernel (ACK) | CroissAndro Kleaf configuration and build policy |
+| `aosp-manifest.xml` | AOSP platform | Android device policy and published kernel prebuilts |
+| `kernel-manifest.xml` | Android Common Kernel (ACK) | Hyper-V kernel configuration and Kleaf build policy |
 
-These files are overlays, not replacements for Google's manifests. Copy each
-one into the corresponding checkout's `.repo/local_manifests` directory after
-running `repo init` against the official upstream manifest.
+These files extend Google's manifests; they do not replace them. Copy each
+overlay into the matching checkout's `.repo/local_manifests` directory after
+initializing that workspace from its official upstream manifest.
 
-The intended layout is:
+## Repository family
+
+| Repository | Responsibility |
+|---|---|
+| [`manifest`](https://github.com/croissandro/manifest) | Adds CroissAndro projects to the AOSP and ACK workspaces — this repository |
+| [`croissandro`](https://github.com/croissandro/croissandro) | Android product, board and device policy |
+| [`kernel-build`](https://github.com/croissandro/kernel-build) | Hyper-V kernel configuration and Kleaf build logic |
+| [`kernel-prebuilts`](https://github.com/croissandro/kernel-prebuilts) | Reviewed kernel artifacts consumed by AOSP |
+
+The upstream `aosp`, `kernel`, and `cuttlefish` checkouts are external and are
+not modified by this repository.
+
+## Workspace layout
 
 ```text
 croissandro/
-├── aosp/                       AOSP platform repo workspace
-│   ├── device/croissandro/     from the AOSP overlay
+├── aosp/                       AOSP repo workspace
+│   ├── device/croissandro/     Android device repository
 │   └── prebuilts/kernel/
-│       └── croissandro/6.18/   reviewed kernel artifacts
+│       └── croissandro/6.18/   kernel-prebuilts repository
 ├── kernel/                     ACK repo workspace
-│   ├── build/kernel/
-│   ├── common/
+│   ├── build/kernel/           upstream Kleaf
+│   ├── common/                 upstream ACK source
 │   ├── croissandro/            kernel-build repository
 │   └── tools/bazel
 └── manifest/                   this repository
 ```
 
-Keeping AOSP and ACK as separate `repo` workspaces follows Google's build
-model: the kernel tree owns sources and build tools, while the Android tree
-consumes published kernel binaries.
+The kernel workspace owns source and build tools. The AOSP workspace consumes
+reviewed binaries. Normal Android builds must not depend directly on
+`kernel/out`.
 
 ## Prerequisites
 
-- A supported 64-bit Linux host
-- Git and Python 3
-- Android `repo` 2.4 or newer
-- Sufficient storage for separate AOSP and kernel checkouts and build outputs
+- supported 64-bit Linux host;
+- Git, Python 3, and Android `repo` 2.4 or newer;
+- enough storage for separate AOSP and ACK checkouts and their outputs.
 
-For complete host requirements, see the official
-[AOSP setup guide](https://source.android.com/docs/setup/start) and
-[kernel build guide](https://source.android.com/docs/setup/build/building-kernels).
+See the official [AOSP setup guide](https://source.android.com/docs/setup/start)
+and [kernel build guide](https://source.android.com/docs/setup/build/building-kernels)
+for complete host requirements.
 
-## AOSP platform workspace
-
-Initialize the platform checkout using Google's current release manifest:
+## Initialize AOSP
 
 ```sh
 mkdir -p "$HOME/repos/croissandro/aosp"
@@ -54,11 +63,7 @@ cd "$HOME/repos/croissandro/aosp"
 repo init --partial-clone \
   -b android-latest-release \
   -u https://android.googlesource.com/platform/manifest
-```
 
-Install the CroissAndro AOSP overlay and sync:
-
-```sh
 mkdir -p .repo/local_manifests
 cp "$HOME/repos/croissandro/manifest/aosp-manifest.xml" \
   .repo/local_manifests/croissandro.xml
@@ -66,32 +71,26 @@ cp "$HOME/repos/croissandro/manifest/aosp-manifest.xml" \
 repo sync -c -j8
 ```
 
-Configure and build the API-level 37 development product:
+Build and validate the current PI-0 API-37 product:
 
 ```sh
 source build/envsetup.sh
 lunch croissandro_hyperv_x86_64-trunk_staging-userdebug
+device/croissandro/tools/validate-pi0.sh
 m
+device/croissandro/tools/validate-pi0.sh --artifacts
 ```
 
-Verify the projects supplied by the overlay:
+PI-0 produces only:
 
-```sh
-repo list | grep -E 'device/croissandro|prebuilts/kernel/croissandro'
-test -f device/croissandro/AndroidProducts.mk
+```text
+out/target/product/croissandro_hyperv_x86_64/system.img
 ```
 
-## ACK kernel workspace
+## Initialize the ACK kernel workspace
 
-The kernel uses its own upstream manifest and checkout. Select an ACK branch
-that is compatible with the Android product. The current bring-up checkout
-uses `common-android-mainline`; pin a release branch and reviewed revisions
-before publishing production prebuilts.
-
-The AOSP overlay currently consumes the `kernel-prebuilts` repository under a
-`6.18` path. Treat `common-android-mainline` as exploratory until the kernel
-branch and that publication namespace are deliberately aligned; do not publish
-a mainline 7.x artifact as if it were a 6.18 build.
+The current bring-up uses `common-android-mainline`. It is exploratory; select
+and pin a compatible ACK release branch before publishing kernel prebuilts.
 
 ```sh
 mkdir -p "$HOME/repos/croissandro/kernel"
@@ -100,11 +99,7 @@ cd "$HOME/repos/croissandro/kernel"
 repo init \
   -b common-android-mainline \
   -u https://android.googlesource.com/kernel/manifest
-```
 
-Install the kernel overlay and sync:
-
-```sh
 mkdir -p .repo/local_manifests
 cp "$HOME/repos/croissandro/manifest/kernel-manifest.xml" \
   .repo/local_manifests/croissandro.xml
@@ -112,31 +107,36 @@ cp "$HOME/repos/croissandro/manifest/kernel-manifest.xml" \
 repo sync -c -j8
 ```
 
-The overlay places the separate `kernel-build` Git repository at
-`kernel/croissandro`, where its Bazel package can use the workspace's Kleaf
-rules and ACK sources without patching `common` or `build/kernel`.
-
-Build and validate from that project:
+Validate and build the Hyper-V kernel policy:
 
 ```sh
 cd "$HOME/repos/croissandro/kernel/croissandro"
 ./check-config.sh
-./build.sh
-```
-
-To choose the distribution directory explicitly:
-
-```sh
 DIST_DIR="$HOME/repos/croissandro/kernel-out" ./build.sh
 ```
 
-After boot and compatibility testing, publish the reviewed artifacts to the
-`kernel-prebuilts` repository consumed by the AOSP overlay. Record both the
-ACK source revision and the `kernel-build` revision with every publication.
+The AOSP overlay currently consumes prebuilts under a `6.18` path. Do not
+publish mainline 7.x artifacts there. Align the ACK branch, publication path,
+and Android device contract together before PI-1.
 
-## Updating existing workspaces
+## Verify the overlays
 
-After pulling this repository, refresh the appropriate overlay and resync.
+AOSP workspace:
+
+```sh
+repo list | grep -E 'device/croissandro|prebuilts/kernel/croissandro'
+test -f device/croissandro/AndroidProducts.mk
+```
+
+Kernel workspace:
+
+```sh
+repo list | grep 'croissandro'
+test -f croissandro/BUILD.bazel
+test -x tools/bazel
+```
+
+## Update an existing workspace
 
 AOSP:
 
@@ -154,22 +154,16 @@ cp ../manifest/kernel-manifest.xml .repo/local_manifests/croissandro.xml
 repo sync -c -j8
 ```
 
-Do not edit `.repo/manifests` or the generated `.repo/manifest.xml`; `repo`
-owns those files. CroissAndro changes remain in this repository and the
-projects declared by these local overlays.
+Do not edit `.repo/manifests` or generated `.repo/manifest.xml`; `repo` owns
+those files. Pin release manifests to reviewed commits or tags instead of
+following mutable `main`.
 
 ## Troubleshooting
 
-- If a CroissAndro project is missing, confirm that the correct overlay exists
-  at `.repo/local_manifests/croissandro.xml`, then rerun `repo sync`.
-- If kernel build analysis reports a missing toolchain project, sync the named
-  path from the kernel workspace. For example:
-
-  ```sh
-  repo sync -c prebuilts/clang/host/linux-x86
-  ```
-
-- If a sync is interrupted, rerun the same command. Reduce `-j8` on a
-  memory- or network-constrained host.
-- Do not delete an entire checkout to repair one failed project; inspect and
-  resync the specific path first.
+- Missing CroissAndro project: verify the matching local overlay exists at
+  `.repo/local_manifests/croissandro.xml`, then rerun `repo sync`.
+- Missing kernel toolchain project: sync the named path from the ACK workspace,
+  for example `repo sync -c prebuilts/clang/host/linux-x86`.
+- Interrupted sync: rerun the same command and reduce `-j8` if necessary.
+- One broken project: inspect and resync that path rather than deleting the
+  entire workspace.
