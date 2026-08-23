@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CroissAndro super manifest.
+
+  The AOSP and ACK submanifests are checked out below aosp/ and kernel/.
+  Their CroissAndro projects are declared in the child manifests so the
+  resulting paths remain aosp/device/... and kernel/croissandro/.
+
+  Keep this file compatible with repo 2.4+; submanifest support is required.
+-->
+<manifest>
+
+  <!-- Remote for this manifest repository's child manifests. -->
+  <remote name="manifest" fetch="https://github.com/croissandro/" />
+
+  <default remote="manifest" revision="main" sync-j="8" />
+
+  <!-- These submanifests are files in this same manifest repository. -->
+  <submanifest
+    name="aosp"
+    manifest-name="aosp-manifest.xml"
+    revision="main"
+    path="aosp"
+    groups="aosp" />
+
+  <!-- Official Android Common Kernel/Kleaf manifest plus CroissAndro policy. -->
+  <submanifest
+    name="kernel"
+    manifest-name="kernel-manifest.xml"
+    revision="main"
+    path="kernel"
+    groups="kernel" />
+
+</manifest>

@@ -15,5 +15,5 @@
     "editor.insertSpaces": true,
     "editor.detectIndentation": false
   },
-  "xml.format.maxLineWidth": 160,
+  "xml.format.maxLineWidth": 192,
 }
